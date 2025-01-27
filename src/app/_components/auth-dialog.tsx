@@ -16,8 +16,9 @@ export default function AuthDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant={"ghost"} className="border">
+        <Button variant={"default"} className="size-full gap-2">
           <CiLogout className="rotate-180 transform" />
+          Sign out
         </Button>
       </DialogTrigger>
       <DialogContent>

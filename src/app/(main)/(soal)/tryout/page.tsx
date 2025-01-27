@@ -12,12 +12,7 @@ export default function TryoutListPage() {
   const router = useRouter();
 
   if (!session || !session.user) {
-    return (
-      <div className="flex h-screen flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold">You are not authenticated</h1>
-        <p className="mt-2">Please log in to access this page.</p>
-      </div>
-    );
+    return <LoadingPage />;
   }
 
   const classId = session.user.classid;
@@ -26,7 +21,7 @@ export default function TryoutListPage() {
     return (
       <div className="flex h-[70vh] flex-col items-center justify-center">
         <h1 className="text-2xl font-bold">
-          You are not enrolled in any classsss
+          You are not enrolled in any class
         </h1>
         <p className="mt-2">
           Please contact your administrator to assign you to a class.
@@ -49,7 +44,7 @@ export default function TryoutListPage() {
     <div className="flex flex-col items-center gap-4">
       <h1 className="text-2xl font-bold">Tryout List</h1>
       <p>Select a tryout package to start</p>
-      <div className="flex flex-col rounded-lg border">
+      <div className="flex flex-col gap-4">
         {packages?.map((pkg) => (
           <Button
             key={pkg.id}
@@ -57,11 +52,23 @@ export default function TryoutListPage() {
             onClick={() => {
               router.push(`/tryout/${pkg.id}`);
             }}
-            className="flex size-fit w-full flex-col rounded-none border-b p-3"
+            className="flex size-fit min-h-32 w-full min-w-72 flex-col border bg-slate-300 p-3"
           >
-            <h3 className="font-bold">{pkg.name}</h3>
-            {pkg.TOstart && <p>Start Date: {pkg.TOstart.toLocaleString()}</p>}
-            {pkg.TOend && <p>End Date: {pkg.TOend.toLocaleString()}</p>}
+            <h3 className="text-2xl font-bold">{pkg.name}</h3>
+            {pkg.TOstart && (
+              <p
+                className={`${new Date(pkg.TOend) < new Date() ? "hidden" : ""}`}
+              >
+                Start Date: {pkg.TOstart.toLocaleString()}
+              </p>
+            )}
+            {pkg.TOend && (
+              <p
+                className={`${new Date(pkg.TOend) < new Date() ? "hidden" : ""}`}
+              >
+                End Date: {pkg.TOend.toLocaleString()}
+              </p>
+            )}
           </Button>
         ))}
       </div>

@@ -10,6 +10,8 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import ErrorPage from "~/app/error";
 import LoadingPage from "~/app/loading";
+import Editor from "~/app/_components/editor";
+import { Separator } from "~/app/_components/ui/separator";
 
 export default function QuizPage() {
   const { packageId, sessionId } = useParams();
@@ -156,7 +158,7 @@ export default function QuizPage() {
   ) : isLoading || isQuestionsLoading ? (
     <LoadingPage />
   ) : (
-    <div className="mx-auto flex w-full flex-col gap-3 p-4">
+    <div className="mx-auto flex w-full flex-col gap-3 p-4 lg:w-3/5">
       <div>
         <p>
           <strong>Subtest: </strong>
@@ -188,7 +190,7 @@ export default function QuizPage() {
         {/* Main Content */}
         <div className="flex w-full flex-col gap-5 overflow-hidden rounded-md border p-3">
           {/* Display the current question */}
-          {new Date(sessionDetails?.endTime) < new Date() && (
+          {/* {new Date(sessionDetails?.endTime) < new Date() && (
             <p className="font-bold">
               Score:{" "}
               {questions[currentQuestionIndex].type === "essay"
@@ -204,28 +206,30 @@ export default function QuizPage() {
                   ? questions[currentQuestionIndex].score
                   : 0}
             </p>
-          )}
+          )} */}
 
           {questions && questions[currentQuestionIndex] && (
-            <div key={questions[currentQuestionIndex].id} className="space-y-2">
-              <p>
-                <strong>
-                  {currentQuestionIndex + 1}.{" "}
-                  {questions[currentQuestionIndex].content}
-                </strong>
-              </p>
-              {questions[currentQuestionIndex].imageUrl && (
-                <Image
-                  src={questions[currentQuestionIndex].imageUrl}
-                  alt="Question Image"
-                  width={300}
-                  height={200}
-                  className="max-h-[50vh] w-fit"
+            <div key={questions[currentQuestionIndex].id} className="gap-3">
+              <strong>{currentQuestionIndex + 1}. </strong>
+              <div className="rounded-lg border pb-5">
+                <Editor
+                  content={questions[currentQuestionIndex].content}
+                  className={"border-none"}
                 />
-              )}
+                {questions[currentQuestionIndex].imageUrl && (
+                  <Image
+                    src={questions[currentQuestionIndex].imageUrl}
+                    alt="Question Image"
+                    width={300}
+                    height={300}
+                    className="max-h-[50vh] w-fit"
+                  />
+                )}
+              </div>
+              <Separator className="mt-3" />
               {questions[currentQuestionIndex].type === "essay" ? (
                 <Input
-                  className="w-full rounded border p-2"
+                  className="mt-3 w-full rounded border p-2"
                   placeholder="Write your answer here..."
                   value={
                     selectedAnswers.get(questions[currentQuestionIndex].id) ||
@@ -246,7 +250,7 @@ export default function QuizPage() {
                 questions[currentQuestionIndex].answers.map((answer) => (
                   <label
                     key={answer.index}
-                    className={`flex flex-row items-center rounded-lg px-5 py-1 ${
+                    className={`mt-3 flex flex-row items-center rounded-lg ${
                       questions[currentQuestionIndex].correctAnswerChoice ===
                         answer.index ||
                       (new Date(sessionDetails.endTime) > new Date() &&
@@ -258,7 +262,7 @@ export default function QuizPage() {
                               questions[currentQuestionIndex].id,
                             ) === answer.index
                           ? "bg-red-500"
-                          : ""
+                          : "hover:bg-slate-300"
                     } ${
                       !(
                         new Date(sessionDetails.endTime) < new Date() &&
@@ -287,29 +291,31 @@ export default function QuizPage() {
                         )
                       }
                     />
-                    {answer.content}
+                    <Editor content={answer.content} />
                   </label>
                 ))
               )}
 
               {/* Display Explanation */}
               {new Date(sessionDetails?.endTime) < new Date() && (
-                <p className="font-bold">
+                <div>
                   Explanation:{" "}
-                  {questions[currentQuestionIndex].explanation ?? "N/A"}
-                </p>
+                  <Editor
+                    content={questions[currentQuestionIndex].explanation ?? ""}
+                  />
+                </div>
               )}
             </div>
           )}
         </div>
 
         {/* Sidebar for navigating questions */}
-        <div className="flex w-full flex-col justify-between gap-3 rounded-md border p-3 md:w-fit">
-          <ul className="flex size-fit gap-3">
+        <div className="flex w-full flex-col justify-between gap-3 rounded-md border p-3">
+          <ul className="flex size-fit flex-wrap gap-3">
             {questions?.map((_, index) => (
               <li key={index} className="size-fit">
                 <Button
-                  className={`size-fit ${
+                  className={`size-9 ${
                     selectedAnswers.has(questions[index].id)
                       ? "bg-green-500 text-white hover:bg-green-600"
                       : ""

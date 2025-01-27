@@ -15,44 +15,51 @@ import { cn } from "~/lib/utils";
 import { useSession } from "next-auth/react";
 import AuthDialog from "./auth-dialog";
 import { GoFile, GoVideo } from "react-icons/go";
+import { GrScorecard } from "react-icons/gr";
 import React from "react";
 
-const soals: { title: string; href: string; description: string }[] = [
+const soal: { title: string; href: string }[] = [
   {
     title: "Kemampuan Penalaran Umum",
     href: "/drill/pu",
-    description:
-      "Mengukur kemampuan berpikir logis, analitis, dan sistematis dalam menyelesaikan masalah.",
   },
   {
     title: "Pengetahuan dan Pemahaman Umum",
     href: "/drill/ppu",
-    description:
-      "Menilai wawasan dan pengetahuan umum serta pemahaman mengenai berbagai isu terkini.",
   },
   {
     title: "Kemampuan Memahami Bacaan dan Menulis",
     href: "/drill/pbm",
-    description:
-      "Mengukur kemampuan dalam memahami teks bacaan dan menyusun tulisan dengan baik dan benar.",
   },
   {
     title: "Pengetahuan Kuantitatif",
     href: "/drill/pk",
-    description:
-      "Menilai kemampuan mengaplikasikan konsep matematika dasar dalam kehidupan sehari-hari.",
   },
   {
     title: "Literasi Bahasa Indonesia dan Bahasa Inggris",
     href: "/drill/lb",
-    description:
-      "Mengukur kemampuan memahami teks dan konteks dalam Bahasa Indonesia dan Bahasa Inggris.",
   },
   {
     title: "Penalaran Matematika",
     href: "/drill/pm",
-    description:
-      "Mengukur kemampuan penalaran matematis dalam menyelesaikan masalah yang lebih kompleks.",
+  },
+];
+
+const menu: { title: string; href: string; logo: JSX.Element }[] = [
+  {
+    title: "File",
+    href: "/file",
+    logo: <GoFile />,
+  },
+  {
+    title: "Video",
+    href: "/video",
+    logo: <GoVideo />,
+  },
+  {
+    title: "My Scores",
+    href: "/my-scores",
+    logo: <GrScorecard />,
   },
 ];
 
@@ -61,7 +68,7 @@ export default function Navbar() {
   const user = session.data?.user;
 
   return (
-    <div className="sticky left-0 top-0 z-50 flex h-10 w-screen items-center justify-center gap-3 bg-background py-6 scrollbar scrollbar-none">
+    <div className="sticky left-0 top-0 z-50 flex h-10 w-screen items-center justify-center gap-3 bg-background py-6 shadow-lg scrollbar scrollbar-none">
       <Link href={"/"}>
         <Image
           src={"/logo.png"}
@@ -73,55 +80,65 @@ export default function Navbar() {
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Drill</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                {soals.map((soal) => (
-                  <ListItem
-                    key={soal.title}
-                    title={soal.title}
-                    href={soal.href}
-                  >
-                    {soal.description}
-                  </ListItem>
-                ))}
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
             <Link href="/tryout" legacyBehavior passHref>
               <Button variant={"ghost"}>Try Out</Button>
             </Link>
           </NavigationMenuItem>
+          {user?.classid && (
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>Drill</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid gap-3 p-4 lg:w-[600px] lg:grid-cols-2">
+                  {soal.map((e) => (
+                    <ListItem
+                      key={e.title}
+                      title={e.title}
+                      href={e.href}
+                    ></ListItem>
+                  ))}
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+          )}
           <NavigationMenuItem>
-            <Link href="/video" legacyBehavior passHref>
-              <Button variant={"ghost"} className="flex gap-2">
-                <GoVideo />
-                <div className="hidden md:block">Video</div>
-              </Button>
-            </Link>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <Link href="/file" legacyBehavior passHref>
-              <Button variant={"ghost"} className="flex gap-2">
-                <GoFile />
-                <div className="hidden md:block">File</div>
-              </Button>
-            </Link>
+            <NavigationMenuTrigger>Menu</NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <ul
+                className={`grid w-[240px] gap-3 p-4 ${user?.classid && "lg:w-[600px] lg:grid-cols-2"}`}
+              >
+                {user?.classid &&
+                  menu.map((e) => (
+                    <ListItem
+                      key={e.title}
+                      title={e.title}
+                      href={e.href}
+                      className="flex gap-2"
+                    >
+                      {e.logo}
+                    </ListItem>
+                  ))}
+                <AuthDialog />
+                {user?.role === "admin" && (
+                  <Link
+                    href={"/user"}
+                    className="flex justify-center rounded-lg border p-2"
+                  >
+                    Manajemen Akun
+                  </Link>
+                )}
+                {user?.role !== "user" && (
+                  <Link
+                    href={"/packageManagement"}
+                    className="flex justify-center rounded-lg border p-2"
+                  >
+                    Manajemen Soal
+                  </Link>
+                )}
+              </ul>
+            </NavigationMenuContent>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
-      {user?.role === "admin" && (
-        <Button variant={"outline"} asChild>
-          <Link href={"/user"}>Manajemen Akun</Link>
-        </Button>
-      )}
-      {user?.role !== "user" && (
-        <Button variant={"outline"} asChild>
-          <Link href={"/packageManagement"}>Manajemen Soal</Link>
-        </Button>
-      )}
-      <AuthDialog />
     </div>
   );
 }
@@ -136,15 +153,13 @@ const ListItem = React.forwardRef<
         <a
           ref={ref}
           className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            "flex size-full select-none items-center justify-center gap-1 rounded-md border p-3 text-center leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className,
           )}
           {...props}
         >
+          {children}
           <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
         </a>
       </NavigationMenuLink>
     </li>

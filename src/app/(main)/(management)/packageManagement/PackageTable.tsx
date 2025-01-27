@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useMemo } from "react";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
@@ -10,22 +8,24 @@ import { Button } from "~/app/_components/ui/button";
 import { Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "~/trpc/react";
+import { ColDef } from "ag-grid-community";
 
 export default function PackageTable({
   packageData,
   refetchPackages,
 }: {
   packageData: {
-    type?: Type;
-    name?: string;
-    id?: number;
-    classId?: number;
-    TOstart?: string | Date;
-    TOend?: string | Date;
+    type?: Type | null;
+    name?: string | null;
+    id?: number | null;
+    classId?: number | null;
+    TOstart?: string | Date | null;
+    TOend?: string | Date | null;
   }[];
   refetchPackages: () => void;
 }) {
   const router = useRouter();
+  const { data: classes } = api.class.getAllClasses.useQuery();
 
   const deletePackageMutation = api.package.deletePackage.useMutation({
     onSuccess: () => {
@@ -43,49 +43,62 @@ export default function PackageTable({
     }
   };
 
-  const columnDefs = useMemo(
+  const columnDefs: ColDef[] = useMemo(
     () => [
       {
-        field: "id" as keyof Package,
+        field: "id",
         headerName: "ID",
         sortable: true,
         filter: true,
       },
       {
-        field: "name" as keyof Package,
+        field: "name",
         headerName: "Name",
         sortable: true,
         filter: true,
       },
       {
-        field: "type" as keyof Package,
+        field: "type",
         headerName: "Type",
         sortable: true,
         filter: true,
       },
       {
-        field: "TOstart" as keyof Package,
+        field: "TOstart",
         headerName: "Start Date",
         sortable: true,
         filter: true,
+        valueFormatter: (params) =>
+          params.value ? new Date(params.value).toLocaleDateString() : "N/A",
       },
       {
-        field: "TOend" as keyof Package,
+        field: "TOend",
         headerName: "End Date",
         sortable: true,
         filter: true,
+        valueFormatter: (params) =>
+          params.value ? new Date(params.value).toLocaleDateString() : "N/A",
       },
       {
-        field: "classId" as keyof Package,
+        field: "classId",
         headerName: "Class",
-        sortable: true,
-        filter: true,
+        filter: "agTextColumnFilter",
+        editable: true,
+        cellEditor: "agSelectCellEditor",
+        cellEditorParams: {
+          values: [null, ...(classes?.map((classItem) => classItem.id) || [])],
+        },
+        valueFormatter: (params) => {
+          if (!params.value) return "No Class";
+          const classItem = classes?.find((c) => c.id === params.value);
+          return classItem ? classItem.name : "";
+        },
       },
       {
         headerName: "Actions",
         cellRenderer: (params: any) => {
           return (
-            <div className="flex gap-2">
+            <div className="flex size-full items-center justify-center gap-2">
               <Button
                 onClick={() =>
                   router.push(`/packageManagement/${params.data.id}`)
@@ -105,7 +118,7 @@ export default function PackageTable({
         },
       },
     ],
-    [router],
+    [router, classes],
   );
 
   return (

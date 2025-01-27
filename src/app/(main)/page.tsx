@@ -10,12 +10,15 @@ import {
 } from "../_components/ui/dialog";
 import { Button } from "../_components/ui/button";
 import { Input } from "../_components/ui/input";
-import { Textarea } from "../_components/ui/textarea";
 import { toast } from "sonner";
 import ErrorPage from "../error";
 import LoadingPage from "../loading";
+import Editor from "../_components/editor";
+import { useEffect, useState } from "react";
 
 export default function MainPage() {
+  const [content, setContent] = useState<string>("");
+
   const {
     data: user,
     isLoading: sessionLoading,
@@ -38,6 +41,10 @@ export default function MainPage() {
     },
   });
 
+  useEffect(() => {
+    setContent(announcement?.content || "");
+  }, [announcement]);
+
   return sessionError || announcementError ? (
     <ErrorPage />
   ) : sessionLoading || announcementLoading ? (
@@ -55,15 +62,15 @@ export default function MainPage() {
           {user?.class?.name && <p>{user.class.name}</p>}
         </div>
       </div>
-      <div className="flex flex-col items-center gap-4 rounded-lg border p-5">
-        <h1 className="text-2xl">{announcement?.title}</h1>
-        <p>{announcement?.content}</p>
+      <div className="flex flex-col items-center gap-4 rounded-lg border p-5 lg:max-w-[50%]">
+        <h1 className="text-2xl font-bold">{announcement?.title}</h1>
+        <Editor content={announcement?.content} className={"border-none"} />
         {user.role === "admin" && (
           <Dialog>
             <DialogTrigger asChild>
               <Button>Edit</Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="flex flex-col gap-4 overflow-auto">
               <DialogTitle>Edit Announcement</DialogTitle>
               <form
                 className="flex flex-col gap-4"
@@ -73,12 +80,10 @@ export default function MainPage() {
                   const title = form.elements.namedItem(
                     "title",
                   ) as HTMLInputElement;
-                  const content = form.elements.namedItem(
-                    "content",
-                  ) as HTMLTextAreaElement;
+
                   updateAnnouncement.mutate({
                     title: title.value,
-                    content: content.value,
+                    content,
                   });
                 }}
               >
@@ -87,11 +92,13 @@ export default function MainPage() {
                   defaultValue={announcement?.title}
                   placeholder="Title"
                 />
-                <Textarea
-                  name="content"
-                  defaultValue={announcement?.content}
-                  placeholder="Content"
-                  className="h-72"
+                <Editor
+                  content={content}
+                  isEdit={true}
+                  className={"min-h-72"}
+                  onContentChange={(updatedContent) =>
+                    setContent(updatedContent)
+                  }
                 />
                 <Button type="submit">Save</Button>
               </form>

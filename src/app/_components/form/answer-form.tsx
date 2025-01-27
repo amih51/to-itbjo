@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Textarea } from "~/app/_components/ui/textarea";
 import { Button } from "~/app/_components/ui/button";
 import { Answer } from "~/lib/types";
+import Editor from "../editor";
 
 interface AnswerFormProps {
   subtestIndex: number;
@@ -43,17 +43,18 @@ const AnswerForm: React.FC<AnswerFormProps> = ({
         checked={isCorrect}
         onChange={setAsCorrect}
       />
-      <Textarea
-        value={answer.content}
-        onChange={(e) =>
+      <Editor
+        isEdit={true}
+        content={answer.content}
+        onContentChange={(updatedContent) =>
           handleAnswerChange(
             subtestIndex,
             questionIndex,
             answerIndex,
-            e.target.value,
+            updatedContent,
           )
         }
-        className="flex-1"
+        className="p-2"
       />
       <Button
         type="button"

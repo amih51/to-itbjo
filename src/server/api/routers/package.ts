@@ -576,4 +576,162 @@ export const packageRouter = createTRPCRouter({
         },
       });
     }),
+
+  // Get a single Subtest by ID
+  getSubtest: userProcedure
+    .input(
+      z.object({
+        id: z.number().positive("Subtest ID must be a positive number"),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const subtest = await ctx.db.subtest.findUnique({
+        where: { id: input.id },
+        include: {
+          questions: {
+            include: {
+              answers: true,
+            },
+          },
+        },
+      });
+
+      if (!subtest) {
+        throw new Error("Subtest not found");
+      }
+
+      return subtest;
+    }),
+
+  // Update a Subtest
+  updateSubtest: teacherProcedure
+    .input(
+      z.object({
+        id: z.number().positive("Subtest ID must be a positive number"),
+        type: z.nativeEnum(SubtestType).optional(),
+        duration: z.number().optional(),
+        questions: z
+          .array(
+            z.object({
+              id: z
+                .number()
+                .positive("Question ID must be a positive number")
+                .optional(),
+              index: z.number().positive("Index must be a positive number"),
+              content: z.string().min(1, "Content is required"),
+              imageUrl: z.string().optional(),
+              type: z.nativeEnum(QuestionType),
+              score: z.number().min(0, "Score must be non-negative"),
+              explanation: z.string().optional(),
+              correctAnswerChoice: z.number().optional(),
+              answers: z.array(
+                z.object({
+                  id: z
+                    .number()
+                    .positive("Answer ID must be a positive number")
+                    .optional(),
+                  index: z.number().positive("Index must be a positive number"),
+                  content: z.string().min(1, "Answer content is required"),
+                }),
+              ),
+            }),
+          )
+          .optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { id, type, duration, questions } = input;
+
+      return await ctx.db.$transaction(async (tx) => {
+        // Update subtest basic info
+        const updatedSubtest = await tx.subtest.update({
+          where: { id },
+          data: {
+            type,
+            duration,
+          },
+        });
+
+        if (questions) {
+          // Handle question updates
+          for (const question of questions) {
+            if (question.id) {
+              // Update existing question
+              const updatedQuestion = await tx.question.update({
+                where: { id: question.id },
+                data: {
+                  index: question.index,
+                  content: question.content,
+                  imageUrl: question.imageUrl,
+                  type: question.type,
+                  score: question.score,
+                  explanation: question.explanation,
+                  correctAnswerChoice: question.correctAnswerChoice,
+                },
+              });
+
+              // Update answers for the question
+              for (const answer of question.answers) {
+                if (answer.id) {
+                  // Update existing answer
+                  await tx.answer.update({
+                    where: { id: answer.id },
+                    data: {
+                      index: answer.index,
+                      content: answer.content,
+                    },
+                  });
+                } else {
+                  // Create new answer
+                  await tx.answer.create({
+                    data: {
+                      index: answer.index,
+                      content: answer.content,
+                      question: { connect: { id: updatedQuestion.id } },
+                    },
+                  });
+                }
+              }
+            } else {
+              // Create new question
+              const subtest = await tx.subtest.findUnique({
+                where: { id },
+                select: { packageId: true },
+              });
+
+              if (!subtest) {
+                throw new Error("Subtest not found");
+              }
+
+              const newQuestion = await tx.question.create({
+                data: {
+                  index: question.index,
+                  content: question.content,
+                  imageUrl: question.imageUrl,
+                  type: question.type,
+                  score: question.score,
+                  explanation: question.explanation,
+                  correctAnswerChoice: question.correctAnswerChoice,
+                  subtest: { connect: { id } },
+                  packageId: subtest.packageId, // Tambahkan packageId
+                },
+              });
+
+              // Create answers for the new question
+              for (const answer of question.answers) {
+                await tx.answer.create({
+                  data: {
+                    index: answer.index,
+                    content: answer.content,
+                    question: { connect: { id: newQuestion.id } },
+                  },
+                });
+              }
+            }
+          }
+        }
+
+        return updatedSubtest;
+      });
+    }),
 });

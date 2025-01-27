@@ -68,12 +68,31 @@ const SubtestForm: React.FC<SubtestFormProps> = ({
 }) => {
   return (
     <div className="flex flex-col gap-3 rounded-xl border p-6">
-      <h3 className="text-xl font-semibold">Subtest {subtestIndex + 1}</h3>
+      {/* <h3 className="text-xl font-semibold">Subtest {subtestIndex + 1}</h3> */}
       <label className="flex w-fit flex-col">
         Subtest Type:
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline">{subtest.type}</Button>
+            <Button variant="outline">
+              {(() => {
+                switch (subtest.type) {
+                  case "pu":
+                    return "Kemampuan Penalaran Umum";
+                  case "ppu":
+                    return "Pengetahuan dan Pemahaman Umum";
+                  case "pbm":
+                    return "Kemampuan Memahami Bacaan dan Menulis";
+                  case "pk":
+                    return "Pengetahuan Kuantitatif";
+                  case "lb":
+                    return "Literasi Bahasa Indonesia dan Bahasa Inggris";
+                  case "pm":
+                    return "Penalaran Matematika";
+                  default:
+                    return subtest.type;
+                }
+              })()}
+            </Button>
           </PopoverTrigger>
           <PopoverContent className="w-full">
             <Command>
@@ -85,7 +104,24 @@ const SubtestForm: React.FC<SubtestFormProps> = ({
                       handleSubtestChange(subtestIndex, "type", type)
                     }
                   >
-                    {type}
+                    {(() => {
+                      switch (type) {
+                        case "pu":
+                          return "Kemampuan Penalaran Umum";
+                        case "ppu":
+                          return "Pengetahuan dan Pemahaman Umum";
+                        case "pbm":
+                          return "Kemampuan Memahami Bacaan dan Menulis";
+                        case "pk":
+                          return "Pengetahuan Kuantitatif";
+                        case "lb":
+                          return "Literasi Bahasa Indonesia dan Bahasa Inggris";
+                        case "pm":
+                          return "Penalaran Matematika";
+                        default:
+                          return type;
+                      }
+                    })()}
                   </CommandItem>
                 ))}
               </CommandList>
@@ -98,7 +134,7 @@ const SubtestForm: React.FC<SubtestFormProps> = ({
         <Input
           type="number"
           min="0"
-          value={subtest.duration.toString()}
+          value={subtest.duration}
           onChange={(e) =>
             handleSubtestChange(
               subtestIndex,

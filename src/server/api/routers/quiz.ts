@@ -82,11 +82,16 @@ export const quizRouter = createTRPCRouter({
       let totalScore = 0;
 
       const subtestsWithScores = packageData.subtests.map((subtest) => {
+        let totalCorrect = 0;
+        let totalQuestion = 0;
+
         const quizSession = subtest.quizSession[0];
         if (!quizSession) {
           return {
             ...subtest,
             quizSession: null,
+            totalCorrect: null,
+            totalQuestion: null,
             score: null,
           };
         }
@@ -95,12 +100,20 @@ export const quizRouter = createTRPCRouter({
           return {
             ...subtest,
             quizSession: quizSession.endTime,
+            totalCorrect: null,
+            totalQuestion: null,
             score: null,
           };
         }
 
         const score = quizSession.userAnswers.reduce((total, answer) => {
+          totalQuestion++;
+
           if (answer.question.correctAnswerChoice !== null) {
+            totalCorrect +=
+              answer.question.correctAnswerChoice === answer.answerChoice
+                ? 1
+                : 0;
             return (
               total +
               (answer.answerChoice === answer.question.correctAnswerChoice
@@ -111,6 +124,7 @@ export const quizRouter = createTRPCRouter({
             const isEssayCorrect =
               answer.essayAnswer.trim().toLowerCase() ===
               answer.question.answers[0]?.content.trim().toLowerCase();
+            totalCorrect += isEssayCorrect ? 1 : 0;
             return total + (isEssayCorrect ? answer.question.score : 0);
           }
           return total;
@@ -121,6 +135,8 @@ export const quizRouter = createTRPCRouter({
         return {
           ...subtest,
           quizSession: quizSession.endTime,
+          totalCorrect,
+          totalQuestion,
           score,
         };
       });
@@ -302,23 +318,324 @@ export const quizRouter = createTRPCRouter({
   getDrillSubtest: userProcedure
     .input(z.object({ subtest: z.nativeEnum(SubtestType) }))
     .query(async ({ ctx, input }) => {
-      return await ctx.db.subtest.findMany({
+      const userId = ctx.session.user.id;
+
+      return await ctx.db.subtest
+        .findMany({
+          where: {
+            package: {
+              type: "drill",
+            },
+            type: input.subtest,
+          },
+          select: {
+            id: true,
+            duration: true,
+            _count: {
+              select: {
+                questions: true,
+              },
+            },
+            package: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            questions: {
+              select: {
+                id: true,
+                userAnswers: {
+                  where: {
+                    userId: userId,
+                  },
+                  select: {
+                    answerChoice: true,
+                    essayAnswer: true,
+                  },
+                },
+                correctAnswerChoice: true,
+                answers: true,
+              },
+            },
+            quizSession: {
+              where: {
+                userId: userId,
+              },
+              select: {
+                id: true,
+              },
+            },
+          },
+        })
+        .then((subtests) => {
+          return subtests.map((subtest) => {
+            let correctCount = 0;
+
+            subtest.questions.forEach((question) => {
+              question.userAnswers.forEach((userAnswer) => {
+                if (question.correctAnswerChoice !== null) {
+                  if (
+                    userAnswer.answerChoice === question.correctAnswerChoice
+                  ) {
+                    correctCount++;
+                  }
+                } else if (userAnswer.essayAnswer !== null) {
+                  const correctEssayAnswer =
+                    userAnswer.essayAnswer.trim().toLowerCase() ===
+                    question.answers[0]?.content.trim().toLowerCase();
+                  if (correctEssayAnswer) {
+                    correctCount++;
+                  }
+                }
+              });
+            });
+
+            return {
+              ...subtest,
+              hasQuizSession: subtest.quizSession.length > 0,
+              _count: {
+                questions: subtest._count.questions,
+                correct: correctCount,
+              },
+            };
+          });
+        });
+    }),
+
+  getDrill: userProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+
+    return await ctx.db.subtest
+      .findMany({
         where: {
           package: {
             type: "drill",
           },
-          type: input.subtest,
+          quizSession: {
+            some: {
+              userId: userId,
+            },
+          },
         },
         select: {
           id: true,
           duration: true,
+          type: true,
+          _count: {
+            select: {
+              questions: true,
+            },
+          },
           package: {
             select: {
               id: true,
               name: true,
             },
           },
+          questions: {
+            select: {
+              id: true,
+              userAnswers: {
+                where: {
+                  userId: userId,
+                },
+                select: {
+                  answerChoice: true,
+                  essayAnswer: true,
+                },
+              },
+              correctAnswerChoice: true,
+              answers: true,
+            },
+          },
+          quizSession: {
+            where: {
+              userId: userId,
+            },
+            select: {
+              id: true,
+            },
+          },
         },
+      })
+      .then((subtests) => {
+        return subtests.map((subtest) => {
+          let correctCount = 0;
+
+          subtest.questions.forEach((question) => {
+            question.userAnswers.forEach((userAnswer) => {
+              if (question.correctAnswerChoice !== null) {
+                if (userAnswer.answerChoice === question.correctAnswerChoice) {
+                  correctCount++;
+                }
+              } else if (userAnswer.essayAnswer !== null) {
+                const correctEssayAnswer =
+                  userAnswer.essayAnswer.trim().toLowerCase() ===
+                  question.answers[0]?.content.trim().toLowerCase();
+                if (correctEssayAnswer) {
+                  correctCount++;
+                }
+              }
+            });
+          });
+
+          const transformedSubtest = {
+            ...subtest,
+            sessionId: subtest.quizSession[0].id,
+            _count: {
+              questions: subtest._count.questions,
+              correct: correctCount,
+            },
+          };
+          delete transformedSubtest.questions;
+          delete transformedSubtest.quizSession;
+          return transformedSubtest;
+        });
       });
-    }),
+  }),
+
+  getTryout: userProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+
+    const tryouts = await ctx.db.package
+      .findMany({
+        where: {
+          type: "tryout",
+          TOend: {
+            lte: new Date(),
+          },
+          quizSession: {
+            some: {
+              userId: userId,
+            },
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          TOstart: true,
+          TOend: true,
+          quizSession: {
+            where: {
+              userId: userId,
+            },
+            select: {
+              id: true,
+              userAnswers: {
+                select: {
+                  questionId: true,
+                  answerChoice: true,
+                  essayAnswer: true,
+                  question: {
+                    select: {
+                      id: true,
+                      correctAnswerChoice: true,
+                      score: true,
+                      answers: {
+                        select: {
+                          content: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          subtests: {
+            select: {
+              id: true,
+              type: true,
+              packageId: true,
+              questions: {
+                select: {
+                  id: true,
+                  correctAnswerChoice: true,
+                  score: true,
+                  type: true,
+                  answers: {
+                    select: {
+                      content: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+      .then((packages) => {
+        return packages.map((pkg) => {
+          const subtests = pkg.subtests.map((subtest) => {
+            let correctCount = 0;
+            let totalScore = 0;
+            let totalQuestions = 0;
+
+            subtest.questions.forEach((question) => {
+              const userAnswersForQuestion = pkg.quizSession.flatMap(
+                (session) =>
+                  session.userAnswers.filter(
+                    (userAnswer) => userAnswer.questionId === question.id,
+                  ),
+              );
+
+              userAnswersForQuestion.forEach((userAnswer) => {
+                totalQuestions++;
+
+                if (question.correctAnswerChoice !== null) {
+                  if (
+                    userAnswer.answerChoice === question.correctAnswerChoice
+                  ) {
+                    correctCount++;
+                    totalScore += question.score;
+                  }
+                } else if (userAnswer.essayAnswer !== null) {
+                  const isEssayCorrect =
+                    userAnswer.essayAnswer.trim().toLowerCase() ===
+                    question.answers[0]?.content.trim().toLowerCase();
+                  if (isEssayCorrect) {
+                    correctCount++;
+                    totalScore += question.score;
+                  }
+                }
+              });
+            });
+
+            return {
+              id: subtest.id,
+              name: subtest.type,
+              sessionId: pkg.quizSession[0].id,
+              correct: correctCount,
+              all: totalQuestions,
+              score: totalScore,
+            };
+          });
+
+          const totalCorrect = subtests.reduce(
+            (total, subtest) => total + subtest.correct,
+            0,
+          );
+          const totalAll = subtests.reduce(
+            (total, subtest) => total + subtest.all,
+            0,
+          );
+          const totalScore = subtests.reduce(
+            (total, subtest) => total + subtest.score,
+            0,
+          );
+
+          return {
+            id: pkg.id,
+            name: pkg.name,
+            correct: totalCorrect,
+            all: totalAll,
+            score: subtests.length > 0 ? totalScore / subtests.length : 0,
+            subtest: subtests,
+          };
+        });
+      });
+
+    return tryouts;
+  }),
 });

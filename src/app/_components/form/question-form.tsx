@@ -18,6 +18,7 @@ import AnswerForm from "./answer-form";
 import Image from "next/image";
 import { UploadDropzone } from "~/utils/uploadthing";
 import { Question } from "~/lib/types";
+import Editor from "../editor";
 
 interface QuestionFormProps {
   subtestIndex: number;
@@ -64,20 +65,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
     <div className="flex flex-col gap-3 rounded-lg border p-3">
       <h4 className="font-semibold">Question {questionIndex + 1}</h4>
       <div>
-        <label>Content: </label>
-        <Textarea
-          value={question.content}
-          onChange={(e) =>
-            handleQuestionChange(
-              subtestIndex,
-              questionIndex,
-              "content",
-              e.target.value,
-            )
-          }
-        />
-      </div>
-      <div>
         <label>Score: </label>
         <Input
           type="number"
@@ -94,17 +81,35 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
         />
       </div>
       <div>
+        <label>Content: </label>
+        <Editor
+          isEdit={true}
+          content={question.content}
+          onContentChange={(updatedContent) =>
+            handleQuestionChange(
+              subtestIndex,
+              questionIndex,
+              "content",
+              updatedContent,
+            )
+          }
+          className={"p-2"}
+        />
+      </div>
+      <div>
         <label>Explanation: </label>
-        <Textarea
-          value={question.explanation}
-          onChange={(e) =>
+        <Editor
+          isEdit={true}
+          content={question.explanation}
+          onContentChange={(updatedContent) =>
             handleQuestionChange(
               subtestIndex,
               questionIndex,
               "explanation",
-              e.target.value,
+              updatedContent,
             )
           }
+          className={"p-2"}
         />
       </div>
       <div>

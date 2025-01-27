@@ -19,7 +19,7 @@
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
+    --border: 0 0% 0%;
     --input: 240 5.9% 90%;
     --ring: 240 10% 3.9%;
     --chart-1: 12 76% 61%;
@@ -68,4 +68,75 @@
 
 * {
   font-family: "Inter", sans-serif;
+}
+
+.tiptap.ProseMirror {
+  outline: none;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: theme("colors.muted.foreground");
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.tiptap {
+  font-size: 1rem;
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.17rem;
+  }
+
+  ul {
+    display: block;
+    list-style-type: disc;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 18px;
+    margin-inline-end: 0px;
+    padding-inline-start: 18px;
+  }
+
+  ol {
+    display: block;
+    list-style-type: decimal;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 18px;
+    margin-inline-end: 0px;
+    padding-inline-start: 18px;
+  }
+
+  ul ul,
+  ol ul {
+    list-style-type: circle;
+    margin-left: 15px;
+  }
+
+  ol ol,
+  ul ol {
+    list-style-type: lower-latin;
+    margin-left: 15px;
+  }
+
+  blockquote {
+    margin: 1em 12px;
+    padding: 0 18px;
+    border-left: 4px solid;
+    font-style: italic;
+  }
+
+  :first-child {
+    margin-top: 0;
+  }
 }

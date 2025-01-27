@@ -1,5 +1,6 @@
 "use client";
 
+import { Separator } from "@radix-ui/react-separator";
 import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -26,24 +27,24 @@ export default function QuizPage() {
   ) : isLoading ? (
     <LoadingPage />
   ) : (
-    <div className="flex flex-col gap-4 rounded-lg border p-4">
-      <div className="flex flex-col items-center gap-2 border-b p-4">
+    <div className="mx-auto flex flex-col gap-4 p-4 lg:w-3/5">
+      <div className="flex flex-col items-center gap-2 p-4">
         <h1 className="mb-4 text-xl font-bold">{packageData.name}</h1>
         {new Date(packageData.TOend) < new Date() && (
           <h2 className="mb-4 text-lg font-semibold">
             Score: {packageData.totalScore / packageData.subtests.length}
           </h2>
         )}
-        <p>Start Time: {new Date(packageData.TOstart).toLocaleString()}</p>
-        <p>End Time: {new Date(packageData.TOend).toLocaleString()}</p>
+        {/* <p>Start Time: {new Date(packageData.TOstart).toLocaleString()}</p>
+        <p>End Time: {new Date(packageData.TOend).toLocaleString()}</p> */}
       </div>
       <div className="flex flex-wrap gap-4">
         {packageData.subtests?.map((subtest) => (
           <Button
             key={subtest.id}
             onClick={() => handleSubtestClick(subtest.id, subtest.duration)}
-            variant="outline"
-            className={`w-full ${subtest.quizSession && "bg-green-600 hover:bg-green-700"}`}
+            variant="ghost"
+            className={`w-full justify-start border px-7 font-bold ${subtest.quizSession && "bg-green-600 hover:bg-green-700"}`}
             disabled={
               (subtest.quizSession &&
                 new Date(subtest?.quizSession) < new Date() &&
@@ -51,27 +52,35 @@ export default function QuizPage() {
               (new Date(packageData.TOend) < new Date() && !subtest.quizSession)
             }
           >
-            {(() => {
-              switch (subtest.type) {
-                case "pu":
-                  return "Kemampuan Penalaran Umum";
-                case "ppu":
-                  return "Pengetahuan dan Pemahaman Umum";
-                case "pbm":
-                  return "Kemampuan Memahami Bacaan dan Menulis";
-                case "pk":
-                  return "Pengetahuan Kuantitatif";
-                case "lb":
-                  return "Literasi Bahasa Indonesia dan Bahasa Inggris";
-                case "pm":
-                  return "Penalaran Matematika";
-                default:
-                  return subtest.type;
-              }
-            })()}{" "}
-            {subtest.duration && `(durasi: ${subtest.duration} menit)`}{" "}
-            <div className={`${!subtest.score && "hidden"}`}>
-              (Score: {subtest.score})
+            <div className="w-full truncate text-left">
+              {(() => {
+                switch (subtest.type) {
+                  case "pu":
+                    return "Kemampuan Penalaran Umum";
+                  case "ppu":
+                    return "Pengetahuan dan Pemahaman Umum";
+                  case "pbm":
+                    return "Kemampuan Memahami Bacaan dan Menulis";
+                  case "pk":
+                    return "Pengetahuan Kuantitatif";
+                  case "lb":
+                    return "Literasi Bahasa Indonesia dan Bahasa Inggris";
+                  case "pm":
+                    return "Penalaran Matematika";
+                  default:
+                    return subtest.type;
+                }
+              })()}
+            </div>
+            <div className={`flex gap-5 ${!subtest.score && "hidden"} `}>
+              <Separator orientation="vertical" className="border" />
+              <div className={`min-w-12`}>
+                {subtest.totalCorrect}/{subtest.totalQuestion}
+              </div>
+              <Separator orientation="vertical" className="border" />
+              <div className={`min-w-12 rounded-lg border`}>
+                {subtest.score}
+              </div>
             </div>
           </Button>
         ))}

@@ -56,6 +56,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData, onSubmit }) => {
               { index: 2, content: "" },
               { index: 3, content: "" },
               { index: 4, content: "" },
+              { index: 5, content: "" },
             ],
             correctAnswerChoice: 1,
           },
@@ -164,6 +165,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData, onSubmit }) => {
                 { index: 2, content: "" },
                 { index: 3, content: "" },
                 { index: 4, content: "" },
+                { index: 5, content: "" },
               ],
               correctAnswerChoice: 1,
             },
@@ -187,6 +189,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData, onSubmit }) => {
         { index: 2, content: "" },
         { index: 3, content: "" },
         { index: 4, content: "" },
+        { index: 5, content: "" },
       ],
       correctAnswerChoice: 1,
     });
@@ -315,7 +318,11 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData, onSubmit }) => {
         <p className="w-full">Start Date:</p>
         <Input
           type="datetime-local"
-          value={formData.TOstart}
+          value={
+            formData.TOstart
+              ? new Date(formData.TOstart).toISOString().slice(0, 16)
+              : ""
+          }
           onChange={(e) => handleChange("TOstart", e.target.value)}
           className="w-fit"
         />
@@ -324,7 +331,11 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData, onSubmit }) => {
         <p className="w-full">End Date:</p>
         <Input
           type="datetime-local"
-          value={formData.TOend}
+          value={
+            formData.TOend
+              ? new Date(formData.TOend).toISOString().slice(0, 16)
+              : ""
+          }
           onChange={(e) => handleChange("TOend", e.target.value)}
           className="w-fit"
         />

@@ -51,7 +51,7 @@ const EditPackagePage: React.FC = () => {
     }
   };
 
-  if (!data) return <p>Package not found</p>;
+  if (!data) return <LoadingPage />;
 
   const sanitizedData: PackageFormData = {
     id: data.id,
@@ -88,9 +88,9 @@ const EditPackagePage: React.FC = () => {
     <LoadingPage />
   ) : (
     <div>
-      <h1 className="flex justify-center text-2xl font-semibold">
+      {/* <h1 className="flex justify-center text-2xl font-semibold">
         Edit Package
-      </h1>
+      </h1> */}
       <PackageForm initialData={sanitizedData} onSubmit={handleSubmit} />
     </div>
   );

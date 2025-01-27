@@ -89,17 +89,20 @@ export default function DrillPage() {
         })()}
       </h1>
       <p>Select a drill package to start</p>
-      <div className="gap- flex flex-col rounded-lg border">
+      <div className="flex flex-col gap-5">
         {packages.map((pkg) => (
           <Button
             key={pkg.id}
-            className="rounded-none border-b"
+            className={`flex min-h-32 min-w-72 flex-col border text-2xl font-bold ${pkg.hasQuizSession ? "bg-green-500 hover:bg-green-600" : "bg-slate-200"}`}
             variant="ghost"
             onClick={() =>
               handleSubtestClick(pkg.id, pkg.duration, pkg.package.id)
             }
           >
-            {pkg.package.name}
+            <div>{pkg.package.name}</div>
+            <div className={`${!pkg.hasQuizSession && "hidden"}`}>
+              {pkg._count.correct}/{pkg._count.questions}
+            </div>
           </Button>
         ))}
       </div>

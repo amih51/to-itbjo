@@ -10,6 +10,13 @@ import { ColDef } from "ag-grid-community";
 import { Button } from "~/app/_components/ui/button";
 import ErrorPage from "~/app/error";
 import LoadingPage from "~/app/loading";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "~/app/_components/ui/select";
 
 export default function PackageManagementPage() {
   const params = useParams();
@@ -35,29 +42,48 @@ export default function PackageManagementPage() {
         cellRenderer: (params: any) => {
           const quizSessions = params.data.quizSession || [];
           return (
-            <div className="flex flex-col gap-2">
+            <div className="flex size-full flex-col items-center justify-center gap-2">
               {quizSessions.length > 0 ? (
-                <select
-                  onChange={(e) => {
-                    const selectedSessionId = e.target.value;
+                <Select
+                  onValueChange={(selectedSessionId) => {
                     if (selectedSessionId) {
                       router.push(
                         `/drill/admin/${packageId}/${selectedSessionId}?userId=${params.data.id}`,
                       );
                     }
                   }}
-                  defaultValue=""
-                  className="rounded border p-1"
                 >
-                  <option value="" disabled>
-                    Select Session
-                  </option>
-                  {quizSessions.map((session) => (
-                    <option key={session.id} value={session.id}>
-                      {session.subtest.type || `Session ${session.id}`}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Session" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {quizSessions.map((session) => (
+                      <SelectItem
+                        key={session.id}
+                        value={session.id.toString()}
+                      >
+                        {(() => {
+                          switch (session.subtest.type) {
+                            case "pu":
+                              return "Kemampuan Penalaran Umum";
+                            case "ppu":
+                              return "Pengetahuan dan Pemahaman Umum";
+                            case "pbm":
+                              return "Kemampuan Memahami Bacaan dan Menulis";
+                            case "pk":
+                              return "Pengetahuan Kuantitatif";
+                            case "lb":
+                              return "Literasi Bahasa Indonesia dan Bahasa Inggris";
+                            case "pm":
+                              return "Penalaran Matematika";
+                            default:
+                              return session.subtest.type;
+                          }
+                        })()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               ) : (
                 <span>No sessions</span>
               )}
@@ -69,7 +95,7 @@ export default function PackageManagementPage() {
     [],
   );
 
-  if (!data) return <div>No users found for this package.</div>;
+  if (!data) return <LoadingPage />;
 
   const rowData = data.map((user) => ({
     quizSession: user.quizSession,
@@ -85,12 +111,56 @@ export default function PackageManagementPage() {
     <LoadingPage />
   ) : (
     <div className="ag-theme-alpine size-full h-[80vh]">
-      <h1 className="text-xl font-bold">Package ID: {packageId}</h1>
-      <Button
-        onClick={() => router.push(`/packageManagement/${packageId}/edit`)}
-      >
-        Edit
-      </Button>
+      <div className="mb-4 flex w-full items-center justify-between">
+        <h1 className="text-xl font-bold">Package ID: {packageId}</h1>
+        <div className="flex gap-4">
+          <Select
+            onValueChange={(selectedSessionId) => {
+              if (selectedSessionId) {
+                router.push(
+                  `/packageManagement/${packageId}/edit/${selectedSessionId}`,
+                );
+              }
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Edit Subtest" />
+            </SelectTrigger>
+            <SelectContent>
+              {data
+                .flatMap((user) => user.quizSession)
+                .map((session) => (
+                  <SelectItem key={session.id} value={session.id.toString()}>
+                    {(() => {
+                      switch (session.subtest.type) {
+                        case "pu":
+                          return "Kemampuan Penalaran Umum";
+                        case "ppu":
+                          return "Pengetahuan dan Pemahaman Umum";
+                        case "pbm":
+                          return "Kemampuan Memahami Bacaan dan Menulis";
+                        case "pk":
+                          return "Pengetahuan Kuantitatif";
+                        case "lb":
+                          return "Literasi Bahasa Indonesia dan Bahasa Inggris";
+                        case "pm":
+                          return "Penalaran Matematika";
+                        default:
+                          return session.subtest.type;
+                      }
+                    })()}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/packageManagement/${packageId}/edit`)}
+          >
+            Edit All
+          </Button>
+        </div>
+      </div>
       <AgGridReact
         rowData={rowData}
         columnDefs={columnDefs}
