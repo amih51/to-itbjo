@@ -10,8 +10,8 @@ import { ourFileRouter } from "~/app/api/uploadthing/core";
 import { Toaster } from "./_components/ui/sonner";
 
 export const metadata: Metadata = {
-  title: "Gijo",
-  description: "Gijo",
+  title: "Nerolusi",
+  description: "Nerolusi",
 };
 
 export default function RootLayout({

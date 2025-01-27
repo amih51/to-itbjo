@@ -18,7 +18,7 @@ export const authConfig = {
   adapter: PrismaAdapter(db),
   events: {
     async createUser({ user }) {
-      if (user.email === "iqbalggwp7@gmail.com") {
+      if (user.email === "nerolusi3@gmail.com") {
         await db.user.update({
           where: { email: user.email },
           data: { role: "admin" },
