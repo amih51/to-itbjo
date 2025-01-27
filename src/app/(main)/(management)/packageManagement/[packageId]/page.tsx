@@ -112,7 +112,7 @@ export default function PackageManagementPage() {
   ) : (
     <div className="ag-theme-alpine size-full h-[80vh]">
       <div className="mb-4 flex w-full items-center justify-between">
-        <h1 className="text-xl font-bold">Package ID: {packageId}</h1>
+        <h1 className="text-xl font-bold">{data.name}</h1>
         <div className="flex gap-4">
           <Select
             onValueChange={(selectedSessionId) => {
