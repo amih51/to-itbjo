@@ -46,16 +46,16 @@ const soal: { title: string; href: string }[] = [
 ];
 
 const menu: { title: string; href: string; logo: JSX.Element }[] = [
-  {
-    title: "File",
-    href: "/file",
-    logo: <GoFile />,
-  },
-  {
-    title: "Video",
-    href: "/video",
-    logo: <GoVideo />,
-  },
+  // {
+  //   title: "File",
+  //   href: "/file",
+  //   logo: <GoFile />,
+  // },
+  // {
+  //   title: "Video",
+  //   href: "/video",
+  //   logo: <GoVideo />,
+  // },
   {
     title: "My Scores",
     href: "/my-scores",
@@ -84,7 +84,7 @@ export default function Navbar() {
               <Button variant={"ghost"}>Try Out</Button>
             </Link>
           </NavigationMenuItem>
-          {user?.classid && (
+          {/* {user?.classid && (
             <NavigationMenuItem>
               <NavigationMenuTrigger>Drill</NavigationMenuTrigger>
               <NavigationMenuContent>
@@ -99,7 +99,7 @@ export default function Navbar() {
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>
-          )}
+          )} */}
           <NavigationMenuItem>
             <NavigationMenuTrigger>Menu</NavigationMenuTrigger>
             <NavigationMenuContent>
