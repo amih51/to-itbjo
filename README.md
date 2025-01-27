@@ -1,4 +1,4 @@
-# Nerolusi
+# GIJO
 
 ## Getting Started
 

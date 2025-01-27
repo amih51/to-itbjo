@@ -72,7 +72,7 @@ export default function Navbar() {
       <Link href={"/"}>
         <Image
           src={"/logo.png"}
-          alt={"logo nerolusi"}
+          alt={"logo"}
           width={"36"}
           height={"36"}
         ></Image>
