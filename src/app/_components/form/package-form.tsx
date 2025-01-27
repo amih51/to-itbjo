@@ -255,6 +255,16 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData, onSubmit }) => {
     onSubmit(preparedFormData);
   };
 
+  function toLocalDatetimeString(date) {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
   return isError ? (
     <ErrorPage />
   ) : isLoading ? (
@@ -319,11 +329,11 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData, onSubmit }) => {
         <Input
           type="datetime-local"
           value={
-            formData.TOstart
-              ? new Date(formData.TOstart).toISOString().slice(0, 16)
-              : ""
+            formData.TOstart ? toLocalDatetimeString(formData.TOstart) : ""
           }
-          onChange={(e) => handleChange("TOstart", e.target.value)}
+          onChange={(e) =>
+            handleChange("TOstart", new Date(e.target.value).toISOString())
+          }
           className="w-fit"
         />
       </label>
@@ -331,11 +341,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData, onSubmit }) => {
         <p className="w-full">End Date:</p>
         <Input
           type="datetime-local"
-          value={
-            formData.TOend
-              ? new Date(formData.TOend).toISOString().slice(0, 16)
-              : ""
-          }
+          value={formData.TOend ? toLocalDatetimeString(formData.TOend) : ""}
           onChange={(e) => handleChange("TOend", e.target.value)}
           className="w-fit"
         />
