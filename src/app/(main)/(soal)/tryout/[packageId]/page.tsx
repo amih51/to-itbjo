@@ -49,7 +49,9 @@ export default function QuizPage() {
               (subtest.quizSession &&
                 new Date(subtest?.quizSession) < new Date() &&
                 new Date(packageData.TOend) >= new Date()) ||
-              (new Date(packageData.TOend) < new Date() && !subtest.quizSession)
+              (new Date(packageData.TOend) < new Date() &&
+                !subtest.quizSession) ||
+              new Date(packageData.TOstart) > new Date()
             }
           >
             <div className="w-full truncate text-left">

@@ -97,7 +97,7 @@ export default function PackageManagementPage() {
 
   if (!data) return <LoadingPage />;
 
-  const rowData = data.map((user) => ({
+  const rowData = data.users?.map((user) => ({
     quizSession: user.quizSession,
     id: user.id,
     name: user.name || "Unnamed User",
@@ -127,30 +127,28 @@ export default function PackageManagementPage() {
               <SelectValue placeholder="Edit Subtest" />
             </SelectTrigger>
             <SelectContent>
-              {data
-                .flatMap((user) => user.quizSession)
-                .map((session) => (
-                  <SelectItem key={session.id} value={session.id.toString()}>
-                    {(() => {
-                      switch (session.subtest.type) {
-                        case "pu":
-                          return "Kemampuan Penalaran Umum";
-                        case "ppu":
-                          return "Pengetahuan dan Pemahaman Umum";
-                        case "pbm":
-                          return "Kemampuan Memahami Bacaan dan Menulis";
-                        case "pk":
-                          return "Pengetahuan Kuantitatif";
-                        case "lb":
-                          return "Literasi Bahasa Indonesia dan Bahasa Inggris";
-                        case "pm":
-                          return "Penalaran Matematika";
-                        default:
-                          return session.subtest.type;
-                      }
-                    })()}
-                  </SelectItem>
-                ))}
+              {data.subtests.map((q) => (
+                <SelectItem key={q.id} value={q.id.toString()}>
+                  {(() => {
+                    switch (q.type) {
+                      case "pu":
+                        return "Kemampuan Penalaran Umum";
+                      case "ppu":
+                        return "Pengetahuan dan Pemahaman Umum";
+                      case "pbm":
+                        return "Kemampuan Memahami Bacaan dan Menulis";
+                      case "pk":
+                        return "Pengetahuan Kuantitatif";
+                      case "lb":
+                        return "Literasi Bahasa Indonesia dan Bahasa Inggris";
+                      case "pm":
+                        return "Penalaran Matematika";
+                      default:
+                        return q.type;
+                    }
+                  })()}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Button

@@ -130,11 +130,34 @@ export const packageRouter = createTRPCRouter({
         },
       });
 
+      const subtests = await ctx.db.subtest.findMany({
+        where: {
+          packageId: input.packageId,
+        },
+        select: { id: true, type: true },
+      });
+
       // Calculate scores for each user
-      return users.map((user) => {
-        const score = user.userAnswers.reduce((total, answer) => {
+      const usersWithScores = users.map((user) => {
+        // Ensure user has a quiz session
+        const quizSession = user.quizSession[0];
+        if (!quizSession) {
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            score: null,
+            quizSession: user.quizSession,
+          };
+        }
+
+        // Total number of subtests
+        const totalSubtests = quizSession.package._count.subtests || 1;
+
+        // Calculate total score for the user
+        const totalScore = user.userAnswers.reduce((total, answer) => {
           if (answer.question.correctAnswerChoice !== null) {
-            // Multiple Choice Scoring
+            // Multiple-choice scoring
             return (
               total +
               (answer.answerChoice === answer.question.correctAnswerChoice
@@ -142,7 +165,7 @@ export const packageRouter = createTRPCRouter({
                 : 0)
             );
           } else if (answer.essayAnswer !== null) {
-            // Essay Scoring
+            // Essay scoring
             const isEssayCorrect =
               answer.essayAnswer.trim().toLowerCase() ===
               answer.question.answers[0]?.content.trim().toLowerCase();
@@ -155,10 +178,15 @@ export const packageRouter = createTRPCRouter({
           id: user.id,
           name: user.name,
           email: user.email,
-          score: score / user.quizSession[0].package._count.subtests,
+          score: totalScore / totalSubtests, // Normalize by subtest count
           quizSession: user.quizSession,
         };
       });
+
+      return {
+        subtests,
+        users: usersWithScores,
+      };
     }),
 
   // Create Package
