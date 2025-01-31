@@ -72,10 +72,12 @@ export default function PackageManagementPage() {
                               return "Kemampuan Memahami Bacaan dan Menulis";
                             case "pk":
                               return "Pengetahuan Kuantitatif";
-                            case "lb":
-                              return "Literasi Bahasa Indonesia dan Bahasa Inggris";
                             case "pm":
                               return "Penalaran Matematika";
+                            case "lbe":
+                              return "Literasi Bahasa Inggris";
+                            case "lbi":
+                              return "Literasi Bahasa Indonesia";
                             default:
                               return session.subtest.type;
                           }
@@ -127,28 +129,32 @@ export default function PackageManagementPage() {
               <SelectValue placeholder="Edit Subtest" />
             </SelectTrigger>
             <SelectContent>
-              {data.subtests.map((q) => (
-                <SelectItem key={q.id} value={q.id.toString()}>
-                  {(() => {
-                    switch (q.type) {
-                      case "pu":
-                        return "Kemampuan Penalaran Umum";
-                      case "ppu":
-                        return "Pengetahuan dan Pemahaman Umum";
-                      case "pbm":
-                        return "Kemampuan Memahami Bacaan dan Menulis";
-                      case "pk":
-                        return "Pengetahuan Kuantitatif";
-                      case "lb":
-                        return "Literasi Bahasa Indonesia dan Bahasa Inggris";
-                      case "pm":
-                        return "Penalaran Matematika";
-                      default:
-                        return q.type;
-                    }
-                  })()}
-                </SelectItem>
-              ))}
+              {data.subtests
+                .sort((a, b) => a.id - b.id)
+                .map((q) => (
+                  <SelectItem key={q.id} value={q.id.toString()}>
+                    {(() => {
+                      switch (q.type) {
+                        case "pu":
+                          return "Kemampuan Penalaran Umum";
+                        case "ppu":
+                          return "Pengetahuan dan Pemahaman Umum";
+                        case "pbm":
+                          return "Kemampuan Memahami Bacaan dan Menulis";
+                        case "pk":
+                          return "Pengetahuan Kuantitatif";
+                        case "pm":
+                          return "Penalaran Matematika";
+                        case "lbe":
+                          return "Literasi Bahasa Inggris";
+                        case "lbi":
+                          return "Literasi Bahasa Indonesia";
+                        default:
+                          return q.type;
+                      }
+                    })()}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
           <Button

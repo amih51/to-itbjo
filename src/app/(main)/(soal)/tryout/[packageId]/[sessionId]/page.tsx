@@ -172,10 +172,12 @@ export default function QuizPage() {
                 return "Kemampuan Memahami Bacaan dan Menulis";
               case "pk":
                 return "Pengetahuan Kuantitatif";
-              case "lb":
-                return "Literasi Bahasa Indonesia dan Bahasa Inggris";
               case "pm":
                 return "Penalaran Matematika";
+              case "lbe":
+                return "Literasi Bahasa Inggris";
+              case "lbi":
+                return "Literasi Bahasa Indonesia";
               default:
                 return sessionDetails?.subtest.type;
             }

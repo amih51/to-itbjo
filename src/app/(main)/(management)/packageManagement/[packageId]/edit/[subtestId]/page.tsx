@@ -21,6 +21,7 @@ const EditSubtestPage: React.FC = () => {
   const { data, isLoading, isError } = api.package.getSubtest.useQuery(
     { id: parsedSubtestId ?? 0 },
     {
+      refetchOnWindowFocus: false,
       enabled: !!parsedSubtestId,
     },
   );

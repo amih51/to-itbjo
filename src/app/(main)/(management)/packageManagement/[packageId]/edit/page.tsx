@@ -18,6 +18,7 @@ const EditPackagePage: React.FC = () => {
   const { data, isLoading, isError } = api.package.getPackage.useQuery(
     { id: parsedPackageId ?? 0 },
     {
+      refetchOnWindowFocus: false,
       enabled: !!parsedPackageId,
     },
   );

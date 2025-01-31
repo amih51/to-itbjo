@@ -56,9 +56,19 @@ export const packageRouter = createTRPCRouter({
             include: {
               questions: {
                 include: {
-                  answers: true,
+                  answers: {
+                    orderBy: {
+                      index: "asc",
+                    },
+                  },
+                },
+                orderBy: {
+                  id: "asc",
                 },
               },
+            },
+            orderBy: {
+              id: "asc",
             },
           },
         },
@@ -626,7 +636,14 @@ export const packageRouter = createTRPCRouter({
         include: {
           questions: {
             include: {
-              answers: true,
+              answers: {
+                orderBy: {
+                  index: "asc",
+                },
+              },
+            },
+            orderBy: {
+              id: "asc",
             },
           },
         },

@@ -36,12 +36,16 @@ const soal: { title: string; href: string }[] = [
     href: "/drill/pk",
   },
   {
-    title: "Literasi Bahasa Indonesia dan Bahasa Inggris",
-    href: "/drill/lb",
-  },
-  {
     title: "Penalaran Matematika",
     href: "/drill/pm",
+  },
+  {
+    title: "Literasi Bahasa Inggris",
+    href: "/drill/lbe",
+  },
+  {
+    title: "Literasi Bahasa Indonesia",
+    href: "/drill/lbi",
   },
 ];
 
