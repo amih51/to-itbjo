@@ -7,7 +7,13 @@ await import("./src/env.js");
 /** @type {import("next").NextConfig} */
 const config = {
   images: {
-    domains: ["utfs.io", "img.youtube.com", "picsum.photos", "loremflickr.com"],
+    domains: [
+      "utfs.io",
+      "img.youtube.com",
+      "picsum.photos",
+      "loremflickr.com",
+      "mviz5f1ktd.ufs.sh",
+    ],
   },
   typescript: {
     ignoreBuildErrors: true,

@@ -114,24 +114,25 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       </div>
       <div>
         <label>Image Upload: </label>
-        <UploadDropzone
-          className="rounded-lg border"
-          endpoint="imageUploader"
-          onClientUploadComplete={(res) =>
-            handleQuestionChange(
-              subtestIndex,
-              questionIndex,
-              "imageUrl",
-              res?.[0]?.url || "",
-            )
-          }
-        />
-        {question.imageUrl && (
+        {question.imageUrl ? (
           <Image
             src={question.imageUrl}
             alt={`Question ${questionIndex + 1} Image`}
             width={300}
             height={300}
+          />
+        ) : (
+          <UploadDropzone
+            className="rounded-lg border"
+            endpoint="imageUploader"
+            onClientUploadComplete={(res) =>
+              handleQuestionChange(
+                subtestIndex,
+                questionIndex,
+                "imageUrl",
+                res?.[0]?.url || "",
+              )
+            }
           />
         )}
       </div>

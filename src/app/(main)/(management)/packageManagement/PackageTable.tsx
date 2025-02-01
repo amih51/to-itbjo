@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { Package, Type } from "@prisma/client";
+import { Type } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { Button } from "~/app/_components/ui/button";
 import { Trash2Icon } from "lucide-react";
@@ -69,7 +69,7 @@ export default function PackageTable({
         sortable: true,
         filter: true,
         valueFormatter: (params) =>
-          params.value ? new Date(params.value).toLocaleDateString() : "N/A",
+          params.value ? new Date(params.value).toString() : "N/A",
       },
       {
         field: "TOend",
@@ -77,7 +77,7 @@ export default function PackageTable({
         sortable: true,
         filter: true,
         valueFormatter: (params) =>
-          params.value ? new Date(params.value).toLocaleDateString() : "N/A",
+          params.value ? new Date(params.value).toString() : "N/A",
       },
       {
         field: "classId",
